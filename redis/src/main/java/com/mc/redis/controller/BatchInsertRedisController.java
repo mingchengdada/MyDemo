@@ -61,14 +61,14 @@ public class BatchInsertRedisController {
         String redisKey;
         while ((redisKey = fileReader.readLine()) != null) {
             String[] s = redisKey.split(",");
-            if(s!=null && s.length >0) {
-                for(String m : s) {
-                    String key = "GRAY_WHITE_LIST_"+m;
+            if (s != null && s.length > 0) {
+                for (String m : s) {
+                    String key = "GRAY_WHITE_LIST_" + m;
                     String value = redisClusterTemplate.get(key);
-                    if(value !=null && "1".equals(value)) {
-                        bufferedWriter.write(key+":"+value+"\n");
+                    if (value != null && "1".equals(value)) {
+                        bufferedWriter.write(key + ":" + value + "\n");
                     } else {
-                        bufferedWriter.write(key+":"+"null"+"\n");
+                        bufferedWriter.write(key + ":" + "null" + "\n");
                     }
                 }
             }
@@ -80,9 +80,9 @@ public class BatchInsertRedisController {
     public String test() throws IOException {
         /* 全量查出迁移结果 */
         File file = new File(System.getProperty("user.dir") + File.separator + "errorAssert.txt");
-        List<AcAssetTransferDetail> acAssetTransferDetails =  acAssetTransferDetailMapper.selectAll();
+        List<AcAssetTransferDetail> acAssetTransferDetails = acAssetTransferDetailMapper.selectAll();
         BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file));
-        for(AcAssetTransferDetail acAssetTransferDetail : acAssetTransferDetails) {
+        for (AcAssetTransferDetail acAssetTransferDetail : acAssetTransferDetails) {
             String oldUserId = "";
             String newUserId = "";
             List<AcPersonalBook> oldBooks;
@@ -94,7 +94,7 @@ public class BatchInsertRedisController {
             newUserId = acAssetTransferDetail.getTargetUserId();
             //状态为0的迁移过后的账本
             oldBooks = acPersonalBookMapper.selectAcctBookByUserId(oldUserId);
-            if(null != oldBooks && oldBooks.size() > 0) {
+            if (null != oldBooks && oldBooks.size() > 0) {
                 oldBooks.forEach(book -> {
                     oldBookIds.add(book.getAcctBookId());
                 });
@@ -104,14 +104,14 @@ public class BatchInsertRedisController {
 
             int count = 0;
             String oldUserId1 = oldUserId.startsWith("013U") ? oldUserId
-                    .substring(4,oldUserId.length()) : "013U"+oldUserId;
+                    .substring(4, oldUserId.length()) : "013U" + oldUserId;
 //            for(String oldBookId : oldBookIds) {
-                acBillDepositFlowNew = acBillDepositFlowMapper.selectDepositByUserIdAndBookId(newUserId,oldUserId,oldUserId1);
-                if(null != acBillDepositFlowNew && acBillDepositFlowNew.size() > 0) {
-                    count = count + acBillDepositFlowNew.size();
-                }
+            acBillDepositFlowNew = acBillDepositFlowMapper.selectDepositByUserIdAndBookId(newUserId, oldUserId, oldUserId1);
+            if (null != acBillDepositFlowNew && acBillDepositFlowNew.size() > 0) {
+                count = count + acBillDepositFlowNew.size();
+            }
 //            }
-            if(count != oldBooks.size()) {
+            if (count != oldBooks.size()) {
                 stringBuilder = new StringBuilder(oldUserId).append("|")
                         .append(newUserId).append("|").append(acAssetTransferDetail.getTaskId()).append("|")
                         .append(oldBooks.size()).append("|").append(acBillDepositFlowNew.size()).append("\n");
